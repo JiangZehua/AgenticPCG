@@ -1,0 +1,27 @@
+[project]
+name = "toolusepcg"
+version = "0.1.0"
+description = "LLM agents use tool to do procedural content generation tasks."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "pcg-benchmark",
+  "numpy",
+  "pyyaml",
+  "portkey-ai",
+  "python-dotenv",
+  "pillow",
+  "openai",
+  "vllm>=0.15.1; sys_platform == 'linux'",
+  "matplotlib>=3.10.8",
+  "google-genai>=1.66.0",
+  "transformers>=4.57.6",
+]
+
+[tool.uv.workspace]
+members = [
+  "submodules/pcg_benchmark",
+]
+
+[tool.uv.sources]
+pcg-benchmark = { workspace = true, editable = true }

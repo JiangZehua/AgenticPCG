@@ -1,0 +1,73 @@
+# Default configuration for ToolUsePCG - Binary Maze problem
+env:
+  name: binary-v0
+  height: 16
+  width: 16
+  tiles:
+    EMPTY: 0
+    WALL: 1
+
+targets:
+  # Connected regions - must be exactly 1
+  num_connected_regions:
+    mode: target
+    value: 1
+
+  # Path length (longest shortest path through the maze)
+  # Option 1: Maximize path length (for quality/diversity experiments)
+  path:
+    mode: maximize
+    min_threshold: 32  # width + height
+  # Option 2: Target specific path length (for controllability experiments)
+  # Uncomment below and comment out the maximize version above
+  # path:
+  #   mode: target
+  #   value: 64        # exact path length to achieve
+  # CLI override: --target path 64
+
+scoring:
+  w_path: 1.0       # weight for longest shortest path
+  w_regions: 10.0   # penalty weight for regions != 1
+
+optimizer:
+  # Acceptance strategy: "greedy" (default) or "annealing" (simulated annealing)
+  strategy: greedy
+  # epsilon_accept_worse: 0.05  # greedy only: probability to accept worse solution
+  epsilon_accept_worse: 0.0  # greedy only: probability to accept worse solution
+  #
+  # Simulated annealing parameters (only used when strategy: annealing)
+  # T(t) = annealing_initial_temp * annealing_decay_rate^t
+  # annealing_initial_temp: 10.0  # starting temperature; higher = more exploration early on
+  # annealing_decay_rate: 0.95    # cooling factor per step; lower = faster cooling
+  # CLI override: --sa-temp 10.0 --sa-decay 0.95  (--sa-temp also sets strategy: annealing)
+  #
+  max_tool_calls_per_step: 20  # max tool calls per agent step
+  #
+  # edit_tools: null  # auto (default): binary gets place_wall_segment, others get place_tile
+  # edit_tools: ["place_tile"]  # force place_tile only (all modes: single, line, rect)
+  # edit_tools: ["place_wall_segment"]  # force place_wall_segment only
+  # edit_tools: ["place_single_tile"]  # single tile placement only (one tile per call)
+  # edit_tools: ["place_line"]  # line placement only (horizontal/vertical lines)
+  # edit_tools: ["place_patch"]  # rectangular patch only (minimum 2x2)
+  # edit_tools: ["place_single_tile", "place_line", "place_patch"]  # granular + lines + bulk
+
+termination:
+  change_budget_multiplier: 2.0  # stop when changes >= multiplier * height * width
+
+llm:
+  model: "@vertexai/gemini-2.5-pro"
+  base_url: "https://ai-gateway.apps.cloud.rt.nyu.edu/v1"
+  max_tokens: 65536
+  temperature: 0.7
+
+# Experiment settings (used by run_experiment.py)
+# Run with: uv run python run_experiment.py --config configs/default.yaml --experiment controllability
+experiment:
+  controllability:
+    ranges:
+      path:
+        min_value: 32   # width + height
+        max_value: 128  # width * height / 2
+        step: 1
+
+seed: 42

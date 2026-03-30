@@ -1,0 +1,138 @@
+# make sure to have different NAME value to avoid same folder name for different run
+defaults:
+  provider: portkey
+  num_trials: 10
+  max_steps: 100
+  max_workers: 30
+  seed: 42
+  render_stats: true
+  debug: true
+
+# --- Google Genai provider example (uses GOOGLE_API_KEY from .env) ---
+# defaults:
+#   provider: google
+#   num_trials: 10
+#   max_steps: 100
+#   max_workers: 30
+#   seed: 42
+#   render_stats: true
+#
+# models:
+#   - name: gemini-2.5-flash
+#     model: gemini-2.5-flash
+#     max_tokens: 65536
+#   - name: gemini-2.5-pro
+#     model: gemini-2.5-pro
+#     max_tokens: 65536
+
+models:
+  - name: gpt-4o-mini
+    model: "@gpt-4o-mini-efbb71/gpt-4o-mini"
+    max_tokens: 16384
+  - name: o3-mini
+    model: "@o3-mini-5791cb/o3-mini"
+    max_tokens: 100000
+  - name: gemini-2.5-pro
+    model: "@vertexai/gemini-2.5-pro"
+    max_tokens: 65536
+  # - name: gemini-3-pro
+  #   model: "@vertexai/gemini-3-pro-preview"
+  #   max_tokens: 65536
+  - name: gemini-3-flash
+    model: "@vertexai/gemini-3-flash-preview"
+    max_tokens: 65536
+  # - name: claude-sonnet-4-6
+  #   model: "@vertexai/anthropic.claude-sonnet-4-6"
+  #   max_tokens: 64000
+  # - name: claude-opus-4-6
+  #   model: "@vertexai/anthropic.claude-opus-4-6"
+  #   max_tokens: 128000
+
+problems:
+  - name: binary
+    config: configs/default.yaml
+  - name: binarydoor
+    config: configs/binarydoor.yaml
+  - name: zelda
+    config: configs/zelda.yaml
+  - name: sokoban
+    config: configs/sokoban.yaml
+  - name: smb
+    config: configs/smb.yaml
+  - name: loderunner
+    config: configs/loderunner.yaml
+
+tools:
+  # - name: default         # auto mode (null edit_tools)
+  # - name: single
+  #   edit_tools: ["place_single_tile"]
+  # - name: line
+  #   edit_tools: ["place_line"]
+  # - name: patch
+  #   edit_tools: ["place_patch"]
+  # - name: single+patch
+  #   edit_tools: ["place_single_tile", "place_patch"]
+  - name: all-modes
+    edit_tools: ["place_tile"]
+  # - name: none
+  #   edit_tools: []
+  # - name: zelda-gen              # Zelda: tile-placing generator + default tile tool
+  #   edit_tools: ["place_tile", "generate_zelda_tile_placing"]
+  # - name: zelda-wall-gen         # Zelda: binary wall generators (preserve special tiles) + tile tool
+  #   edit_tools: ["place_tile", "generate_zelda_random", "generate_zelda_ca", "generate_zelda_connect"]
+  # - name: zelda-wall-gen-all     # Zelda: all binary wall generators + tile tool
+  #   edit_tools: ["place_tile", "generate_zelda_random", "generate_zelda_maze", "generate_zelda_bsp", "generate_zelda_ca", "generate_zelda_connect", "generate_zelda_digger", "generate_zelda_wfc"]
+
+inits:
+  # - name: random            # uniform random from content_space.sample()
+  - name: empty             # all passable tiles
+  - name: filled            # all blocking/wall tiles
+  - name: weighted          # weighted random (common tiles favored, special tiles rare)
+
+# tool_calls:
+  - name: "5"
+    max_tool_calls: 5
+#   - name: "10"
+#     max_tool_calls: 10
+  - name: "15"
+    max_tool_calls: 15
+#   - name: "20"
+#     max_tool_calls: 20
+
+# change_percentages:                # Change budget multiplier (budget = multiplier * height * width; default: 2.0 if omitted)
+#   - name: "1.0"
+#     change_percentage: 1.0
+#   - name: "2.0"
+#     change_percentage: 2.0
+#   - name: "3.0"
+#     change_percentage: 3.0
+#   - name: "5.0"
+#     change_percentage: 5.0
+
+annealings:                     # Optimizer acceptance strategy (default: greedy if omitted)
+  - name: greedy                # Standard hill-climbing (current default)
+#   - name: greedy-eps05          # Greedy with 50% chance to accept worse
+#     epsilon_accept_worse: 0.05
+#   - name: sa-t10                # Simulated annealing T0=10
+#     strategy: annealing
+#     annealing_initial_temp: 10.0   # Starting temperature T0; T(t) = T0 * rate^t
+#     annealing_decay_rate: 0.95     # Cooling factor per step
+#   - name: sa-t05                # Simulated annealing T0=5 (more exploration)
+#     strategy: annealing
+#     annealing_initial_temp: 5.0
+#     annealing_decay_rate: 0.80
+
+conv_lengths:                    # Conversation history length (default: 1 if omitted)
+  - name: "1"                    # No history (current turn only)
+    conv_length: 1
+#   - name: "2"                    # Keep 2 turns of history
+#     conv_length: 2
+  - name: "3"                    # Keep 3 turns of history
+    conv_length: 3
+#   - name: "4"                    # Keep 4 turns of history
+#     conv_length: 4
+
+experiments:
+  - quality
+  - diversity
+  - controllability

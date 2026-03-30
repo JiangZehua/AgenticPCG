@@ -1,0 +1,93 @@
+# Configuration for Super Mario Bros level optimization
+env:
+  name: smb-v0
+  height: 16
+  width: 32
+  # smb_solver: astar  # "auto" (default: heuristic agent then A*) or "astar" (A* only)
+  #
+  tiles:
+    EMPTY: 0
+    SOLID: 1
+    LADDER: 2
+    BRICK: 3
+    QUESTION: 4
+    TUBE: 5
+    COIN: 6
+    GOOMBA: 7
+    KOOPA: 8
+    SPINY: 9
+
+targets:
+  # Completion percentage - should be 100%
+  complete:
+    mode: target
+    value: 1.0
+
+  # Gameplay elements
+  # Option 1: Fixed counts (for quality/diversity experiments)
+  enemies:
+    mode: target
+    value: 3
+  jumps:
+    mode: target
+    value: 5
+  coins:
+    mode: target
+    value: 3
+  # Option 2: Variable counts (for controllability experiments)
+  # Uncomment below and comment out the fixed version above
+  # enemies:
+  #   mode: target
+  #   value: 4        # exact enemy count
+  # jumps:
+  #   mode: target
+  #   value: 6        # exact jump count
+  # coins:
+  #   mode: target
+  #   value: 2        # exact coin count
+  # CLI override: --target enemies 4 --target jumps 6 --target coins 2
+
+scoring:
+  w_path: 1.0       # not directly used
+  w_regions: 10.0   # not directly used
+  # SMB-specific weights
+  w_player: 100.0   # not directly used for SMB
+  w_enemy: 20.0     # weight for enemies killed
+  w_complete: 100.0 # completion score (continuous: w_complete * complete)
+  w_coins: 15.0     # weight for coins collected
+  w_jumps: 10.0     # weight for jumps made
+
+optimizer:
+  strategy: greedy
+  epsilon_accept_worse: 0.0
+  # epsilon_accept_worse: 0.05
+  max_tool_calls_per_step: 20
+
+termination:
+  change_budget_multiplier: 3.0
+
+llm:
+  model: "@vertexai/gemini-2.5-pro"
+  base_url: "https://ai-gateway.apps.cloud.rt.nyu.edu/v1"
+  max_tokens: 65536
+  temperature: 0.7
+
+# Experiment settings (used by run_experiment.py)
+# Run with: uv run python run_experiment.py --config configs/smb.yaml --experiment controllability
+experiment:
+  controllability:
+    ranges:
+      enemies:
+        min_value: 0
+        max_value: 4    # ~width / 7
+        step: 1
+      jumps:
+        min_value: 0
+        max_value: 6    # ~width / 5
+        step: 1
+      coins:
+        min_value: 0
+        max_value: 3    # ~width / 10
+        step: 1
+
+seed: 42

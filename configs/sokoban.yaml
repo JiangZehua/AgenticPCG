@@ -1,0 +1,78 @@
+# Configuration for Sokoban level optimization
+env:
+  name: sokoban-v0
+  height: 8
+  width: 8
+  tiles:
+    SOLID: 0
+    EMPTY: 1
+    PLAYER: 2
+    CRATE: 3
+    TARGET: 4
+
+targets:
+  # Player count - must be exactly 1
+  players:
+    mode: target
+    value: 1
+
+  # Crates and targets - must be equal
+  # Option 1: Fixed count (for quality/diversity experiments)
+  crates:
+    mode: target
+    value: 3
+  targets:
+    mode: target
+    value: 3
+  # Option 2: Variable crate count (for controllability experiments)
+  # Uncomment below and comment out the fixed version above
+  # crates:
+  #   mode: target
+  #   value: 5        # exact crate count to achieve
+  # targets:
+  #   mode: target
+  #   value: 5        # must match crates
+  # CLI override: --target crates 5 --target targets 5
+
+  # Heuristic - 0 means solvable with optimal solution
+  heuristic:
+    mode: target
+    value: 0
+
+scoring:
+  w_path: 1.0       # weight for solution length (maximize)
+  w_regions: 10.0   # not used for sokoban but kept for compatibility
+  # Sokoban-specific weights
+  w_player: 100.0   # bonus if exactly 1 player, penalty per extra/missing
+  w_crate: 50.0     # penalty per crate difference from target
+  w_target: 50.0    # penalty per target difference from target
+  w_balance: 100.0  # penalty if crates != targets
+  w_solvable: 300.0 # large bonus for solvable level
+  w_solution: 1.0   # weight for solution length
+
+optimizer:
+  strategy: greedy
+  epsilon_accept_worse: 0.0
+  # epsilon_accept_worse: 0.05
+  max_tool_calls_per_step: 20
+
+termination:
+  change_budget_multiplier: 3.0  # more budget since puzzles require careful placement
+
+llm:
+  model: "@vertexai/gemini-2.5-pro"
+  base_url: "https://ai-gateway.apps.cloud.rt.nyu.edu/v1"
+  max_tokens: 65536
+  temperature: 0.7
+
+# Experiment settings (used by run_experiment.py)
+# Run with: uv run python run_experiment.py --config configs/sokoban.yaml --experiment controllability
+experiment:
+  controllability:
+    ranges:
+      crates:
+        min_value: 2
+        max_value: 6
+        step: 1
+
+seed: 42

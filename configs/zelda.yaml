@@ -1,0 +1,92 @@
+# Configuration for Zelda level optimization
+env:
+  name: zelda-v0
+  height: 16
+  width: 16
+  tiles:
+    WALL: 0
+    EMPTY: 1
+    PLAYER: 2
+    KEY: 3
+    DOOR: 4
+    ENEMY: 5
+
+targets:
+  # Entity counts - must be exactly 1
+  players:
+    mode: target
+    value: 1
+  keys:
+    mode: target
+    value: 1
+  doors:
+    mode: target
+    value: 1
+  # Enemies - default is 3 for zelda-v0
+  enemies:
+    mode: target
+    value: 3
+
+  # Path lengths (player->key and key->door)
+  # Option 1: Maximize path length (for quality/diversity experiments)
+  player_key:
+    mode: maximize
+    min_threshold: 16  # (width + height) / 2
+  key_door:
+    mode: maximize
+    min_threshold: 16
+  # Option 2: Target specific path length (for controllability experiments)
+  # Uncomment below and comment out the maximize version above
+  # player_key:
+  #   mode: target
+  #   value: 20        # exact path length to achieve
+  # key_door:
+  #   mode: target
+  #   value: 20
+  # CLI override: --target player_key 20 --target key_door 20
+
+  # Total solution length (player_key + key_door) - alternative to individual paths
+  # solution_length:
+  #   mode: maximize
+  #   min_threshold: 32  # width + height = 16 + 16 = 32
+
+scoring:
+  w_path: 1.0       # weight for solution length
+  w_regions: 10.0   # penalty weight for regions != 1
+  # Critical tile weights (Zelda-specific)
+  w_player: 100.0   # bonus if exactly 1 player, penalty per extra/missing
+  w_key: 100.0      # bonus if exactly 1 key, penalty per extra/missing
+  w_door: 100.0     # bonus if exactly 1 door, penalty per extra/missing
+  w_enemy: 5.0      # penalty per enemy difference from target
+  w_playable: 200.0 # bonus if level is solvable (player->key->door paths exist)
+
+optimizer:
+  strategy: greedy
+  epsilon_accept_worse: 0.0
+  # epsilon_accept_worse: 0.05
+  max_tool_calls_per_step: 20
+
+termination:
+  change_budget_multiplier: 3.0  # more budget since more tile types
+
+llm:
+  model: "@vertexai/gemini-2.5-pro"
+  base_url: "https://ai-gateway.apps.cloud.rt.nyu.edu/v1"
+  max_tokens: 65536
+  temperature: 0.7
+
+# Experiment settings (used by run_experiment.py)
+# Run with: uv run python run_experiment.py --config configs/zelda.yaml --experiment controllability
+experiment:
+  controllability:
+    ranges:
+      player_key:
+        min_value: 10
+        max_value: 40
+        step: 1
+      key_door:
+        min_value: 10
+        max_value: 40
+        step: 1
+
+seed: 42

@@ -1,0 +1,93 @@
+# Configuration for Lode Runner level optimization
+env:
+  name: loderunner-v0
+  height: 11
+  width: 16
+  tiles:
+    SOLID: 0
+    EMPTY: 1
+    PLAYER: 2
+    GOLD: 3
+    ENEMY: 4
+    LADDER: 5
+    ROPE: 6
+
+targets:
+  # Player count - must be exactly 1
+  players:
+    mode: target
+    value: 1
+
+  # Gold pieces
+  gold:
+    mode: target
+    value: 3
+
+  # Enemies
+  enemies:
+    mode: target
+    value: 2
+
+  # Structural elements (ladder and rope)
+  # Option 1: Fixed counts (for quality/diversity experiments)
+  ladder:
+    mode: target
+    value: 10
+  rope:
+    mode: target
+    value: 5
+  # Option 2: Variable counts (for controllability experiments)
+  # Uncomment below and comment out the fixed version above
+  # ladder:
+  #   mode: target
+  #   value: 15       # exact ladder tile count
+  # rope:
+  #   mode: target
+  #   value: 8        # exact rope tile count
+  # CLI override: --target ladder 15 --target rope 8
+
+  # Collected gold - maximize
+  collected_gold:
+    mode: maximize
+
+scoring:
+  w_path: 1.0       # not directly used
+  w_regions: 10.0   # not directly used
+  # Lode Runner-specific weights
+  w_player: 100.0   # bonus if exactly 1 player
+  w_gold: 20.0      # weight for gold count
+  w_enemy: 10.0     # weight for enemy count
+  w_ladder: 10.0    # weight for ladder count
+  w_rope: 10.0      # weight for rope count
+  w_collected: 50.0 # bonus for collectible gold
+
+optimizer:
+  strategy: greedy
+  epsilon_accept_worse: 0.0
+  # epsilon_accept_worse: 0.05
+  max_tool_calls_per_step: 20
+
+termination:
+  change_budget_multiplier: 3.0
+
+llm:
+  model: "@vertexai/gemini-2.5-pro"
+  base_url: "https://ai-gateway.apps.cloud.rt.nyu.edu/v1"
+  max_tokens: 65536
+  temperature: 0.7
+
+# Experiment settings (used by run_experiment.py)
+# Run with: uv run python run_experiment.py --config configs/loderunner.yaml --experiment controllability
+experiment:
+  controllability:
+    ranges:
+      ladder:
+        min_value: 0
+        max_value: 35   # ~0.2 * width * height
+        step: 1
+      rope:
+        min_value: 0
+        max_value: 35
+        step: 1
+
+seed: 42

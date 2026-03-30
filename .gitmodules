@@ -1,0 +1,7 @@
+[submodule "submodules/pcg_benchmark"]
+	path = submodules/pcg_benchmark
+	url = git@github.com:JiangZehua/pcg_benchmark.git
+[submodule "submodules/ConstructiveGenerators"]
+	path = submodules/ConstructiveGenerators
+	url = git@github.com:JiangZehua/ConstructiveGenerators.git
+

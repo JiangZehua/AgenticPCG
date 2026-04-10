@@ -1,11 +1,15 @@
-# ToolUsePCG
-[![Website](https://img.shields.io/badge/Website-AgenticPCG-blue)](https://jiangzehua.github.io/AgenticPCG/)
+<h1 align="center">ToolUsePCG</h1>
+<p align="center">
+  <a href="https://zehua-jiang.github.io/AgenticPCG/"><img src="https://img.shields.io/badge/Website-AgenticPCG-blue" alt="Website"></a>
+</p>
+
 <p align="center">
   <img src="assets/concat_1x4.gif" alt="Binary Maze, Zelda, Lode Runner, and Sokoban level generation" width="700">
 </p>
 <p align="center">
   <img src="assets/smb_parallel.gif" alt="Super Mario Bros level generation" width="700">
 </p>
+
 
 
 LLM agent system that uses structured tool calling to optimize game levels through iterative evaluation and editing. Supports Binary Maze, BinaryDoor, Zelda, Sokoban, LodeRunner, and Super Mario Bros.
@@ -124,3 +128,23 @@ See [docs/configuration.md](docs/configuration.md) for edit tools, initializatio
 - [docs/visualization.md](docs/visualization.md) — Rendering, trajectory, animation, trace analysis, cross-model tables
 - [docs/adding_a_new_game.md](docs/adding_a_new_game.md) — Step-by-step guide to adding a new game domain
 - [PCG Benchmark](https://github.com/JiangZehua/pcg_benchmark) — The evaluation benchmark (included as a submodule)
+
+## Citation
+
+If you find this work helpful, please cite us. Note: a formal publication is forthcoming — this BibTeX entry will be updated accordingly.
+
+```bibtex
+@misc{jiang_2026_19355469,
+  author       = {Jiang, Zehua and
+                  Earle, Sam and
+                  Khalifa, Ahmed and
+                  Togelius, Julian},
+  title        = {Agentic PCG: Procedural Content Generation via
+                   Tool-using LLMs},
+  month        = mar,
+  year         = 2026,
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.19355469},
+  url          = {https://doi.org/10.5281/zenodo.19355469},
+}
+```

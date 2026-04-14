@@ -1,4 +1,4 @@
-<h1 align="center">ToolUsePCG</h1>
+<h1 align="center">Agentic PCG</h1>
 <p align="center">
   <a href="https://zehua-jiang.github.io/AgenticPCG/"><img src="https://img.shields.io/badge/Website-AgenticPCG-blue" alt="Website"></a>
 </p>
@@ -131,7 +131,7 @@ See [docs/configuration.md](docs/configuration.md) for edit tools, initializatio
 
 ## Citation
 
-If you find this work helpful, please cite us. Note: a formal publication is forthcoming — this BibTeX entry will be updated accordingly.
+If you find this work helpful, please cite us. Note: a formal publication is forthcoming --- this BibTeX entry will be updated accordingly.
 
 ```bibtex
 @misc{jiang_2026_19355469,

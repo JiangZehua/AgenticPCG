@@ -241,7 +241,7 @@ class TerminationConfig:
 
 @dataclass
 class LLMConfig:
-    provider: str = "portkey"  # "portkey", "openai", or "google"
+    provider: str = "portkey"  # "portkey", "openai", "deepseek", "google", or "anthropic"
     model: str = "@vertexai/gemini-2.5-pro"
     base_url: str = "https://ai-gateway.apps.cloud.rt.nyu.edu/v1"
     max_tokens: int = 65536

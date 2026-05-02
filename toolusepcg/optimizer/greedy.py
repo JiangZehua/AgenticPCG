@@ -79,6 +79,7 @@ class StepRecord:
     truncated: bool = False
     input_tokens: int = 0
     output_tokens: int = 0
+    elapsed_time: float = 0.0
 
 
 @dataclass
@@ -175,6 +176,8 @@ class GreedyOptimizer:
         Supported providers:
         - "portkey": Uses the Portkey SDK (default).
         - "openai": Uses the OpenAI SDK (works with vLLM, TGI, etc.).
+        - "deepseek": Uses the OpenAI SDK against api.deepseek.com.
+        - "google": Uses the Google Genai SDK.
         """
         if self._client is None:
             provider = self.config.llm.provider
@@ -191,14 +194,30 @@ class GreedyOptimizer:
                     base_url=self.config.llm.base_url,
                     api_key=api_key,
                 )
+            elif provider == "deepseek":
+                from openai import OpenAI
+                api_key = self.config.llm.api_key or os.environ.get("DEEPSEEK_API_KEY")
+                if not api_key:
+                    raise ValueError("DeepSeek provider requires api_key in config or DEEPSEEK_API_KEY env var.")
+                base_url = self.config.llm.base_url or "https://api.deepseek.com"
+                # Treat the NYU gateway default as unset for DeepSeek.
+                if "ai-gateway.apps.cloud.rt.nyu.edu" in (base_url or ""):
+                    base_url = "https://api.deepseek.com"
+                self._client = OpenAI(base_url=base_url, api_key=api_key)
             elif provider == "google":
                 from google import genai
                 api_key = self.config.llm.api_key or os.environ.get("GOOGLE_API_KEY")
                 if not api_key:
                     raise ValueError("Google provider requires api_key in config or GOOGLE_API_KEY env var.")
                 self._client = genai.Client(api_key=api_key)
+            elif provider == "anthropic":
+                import anthropic
+                api_key = self.config.llm.api_key or os.environ.get("ANTHROPIC_API_KEY")
+                if not api_key:
+                    raise ValueError("Anthropic provider requires api_key in config or ANTHROPIC_API_KEY env var.")
+                self._client = anthropic.Anthropic(api_key=api_key)
             else:
-                raise ValueError(f"Unknown LLM provider: {provider!r}. Use 'portkey', 'openai', or 'google'.")
+                raise ValueError(f"Unknown LLM provider: {provider!r}. Use 'portkey', 'openai', 'deepseek', 'google', or 'anthropic'.")
 
     def _init_tools(self) -> None:
         """Initialize tool registry with EditManager.
@@ -1426,6 +1445,8 @@ Respond with ONLY the JSON object, no additional text."""
             try:
                 if self.config.llm.provider == "google":
                     content, truncated, input_tokens, output_tokens = self._call_google(messages, timeout)
+                elif self.config.llm.provider == "anthropic":
+                    content, truncated, input_tokens, output_tokens = self._call_anthropic(messages, timeout)
                 else:
                     response = self._client.chat.completions.create(**api_params)
                     content = response.choices[0].message.content
@@ -1489,6 +1510,34 @@ Respond with ONLY the JSON object, no additional text."""
             input_tokens = getattr(usage, "prompt_token_count", 0) or 0
             output_tokens = getattr(usage, "candidates_token_count", 0) or 0
 
+        return content, truncated, input_tokens, output_tokens
+
+    def _call_anthropic(self, messages: list[dict], timeout: float) -> tuple[str, bool, int, int]:
+        """Call Anthropic Messages API and return (content, truncated, input_tokens, output_tokens)."""
+        system_text = None
+        anth_messages = []
+        for msg in messages:
+            if msg["role"] == "system":
+                system_text = msg["content"]
+            else:
+                anth_messages.append({"role": msg["role"], "content": msg["content"]})
+
+        kwargs = dict(
+            model=self.config.llm.model,
+            max_tokens=self.config.llm.max_tokens,
+            temperature=self.config.llm.temperature,
+            messages=anth_messages,
+            timeout=timeout,
+        )
+        if system_text is not None:
+            kwargs["system"] = system_text
+
+        response = self._client.messages.create(**kwargs)
+        content = "".join(b.text for b in response.content if getattr(b, "type", None) == "text")
+        truncated = response.stop_reason == "max_tokens"
+        usage = getattr(response, "usage", None)
+        input_tokens = getattr(usage, "input_tokens", 0) or 0
+        output_tokens = getattr(usage, "output_tokens", 0) or 0
         return content, truncated, input_tokens, output_tokens
 
     def parse_response(self, response: str, truncated: bool = False) -> tuple[StepMessage | ProposeSkillMessage | StopMessage | None, list[str]]:
@@ -1765,7 +1814,8 @@ Respond with ONLY the JSON object, no additional text."""
         # Header
         print(f"\n{'='*60}")
         token_info = f" | Tokens: {record.input_tokens}in/{record.output_tokens}out" if record.input_tokens or record.output_tokens else ""
-        print(f"Step {record.step_num} | Type: {record.message_type}{token_info}")
+        time_info = f" | Time: {record.elapsed_time:.1f}s" if record.elapsed_time > 0 else ""
+        print(f"Step {record.step_num} | Type: {record.message_type}{token_info}{time_info}")
         print(f"{'='*60}")
 
         # Show rationale from parsed message
@@ -2020,7 +2070,9 @@ Respond with ONLY the JSON object, no additional text."""
                 break
 
             # Execute step
+            step_start = time.time()
             record = self.step()
+            record.elapsed_time = time.time() - step_start
 
             # Track consecutive errors for circuit breaker
             # Truncation-caused parse errors don't count - they indicate
@@ -2060,6 +2112,8 @@ Respond with ONLY the JSON object, no additional text."""
             "total_input_tokens": total_input_tokens,
             "total_output_tokens": total_output_tokens,
             "total_tokens": total_input_tokens + total_output_tokens,
+            "total_time": sum(r.elapsed_time for r in self.step_records),
+            "avg_step_time": sum(r.elapsed_time for r in self.step_records) / len(self.step_records) if self.step_records else 0,
         }
 
         # Log final state

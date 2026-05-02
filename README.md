@@ -64,6 +64,18 @@ uv run python main.py --config configs/zelda.yaml \
 echo "GOOGLE_API_KEY=your-key-here" >> .env
 uv run python main.py --config configs/binary_32.yaml \
   --provider google --model gemini-2.5-flash --seed 42 --max-steps 50
+
+# DeepSeek (api.deepseek.com, OpenAI-compatible)
+echo "DEEPSEEK_API_KEY=your-key-here" >> .env
+uv run python main.py --config configs/smb.yaml \
+  --provider deepseek --model deepseek-v4-pro --seed 42 --max-steps 50
+# Models: deepseek-v4-pro (reasoning), deepseek-v4-flash (faster/cheaper)
+
+# Anthropic (Claude models via the Anthropic SDK)
+echo "ANTHROPIC_API_KEY=your-key-here" >> .env
+uv run python main.py --config configs/default.yaml \
+  --provider anthropic --model claude-haiku-4-5 --max-tokens 32000 --seed 42 --max-steps 50
+# Note: Claude Haiku 4.5 caps output at 64k tokens; lower --max-tokens accordingly.
 ```
 
 ## Experiments & Sweeps
@@ -134,17 +146,11 @@ See [docs/configuration.md](docs/configuration.md) for edit tools, initializatio
 If you find this work helpful, please cite us. Note: a formal publication is forthcoming --- this BibTeX entry will be updated accordingly.
 
 ```bibtex
-@misc{jiang_2026_19355469,
-  author       = {Jiang, Zehua and
-                  Earle, Sam and
-                  Khalifa, Ahmed and
-                  Togelius, Julian},
-  title        = {Agentic PCG: Procedural Content Generation via
-                   Tool-using LLMs},
-  month        = mar,
-  year         = 2026,
-  publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.19355469},
-  url          = {https://doi.org/10.5281/zenodo.19355469},
+@misc{jiang2026agentic,
+  title        = {Agentic PCG: Procedural Content Generation via Tool-using LLMs},
+  author       = {Jiang, Zehua and Earle, Sam and Khalifa, Ahmed and Togelius, Julian},
+  year         = {2026},
+  howpublished = {Available at SSRN 6499021},
+  url          = {https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6499021}
 }
 ```

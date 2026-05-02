@@ -50,9 +50,9 @@ def main():
     parser.add_argument(
         "--provider",
         type=str,
-        choices=["portkey", "openai", "google"],
+        choices=["portkey", "openai", "deepseek", "google", "anthropic"],
         default=None,
-        help="LLM provider: 'portkey' (default), 'openai' (for vLLM, TGI, etc.), or 'google' (Google Genai SDK)",
+        help="LLM provider: 'portkey' (default), 'openai' (for vLLM, TGI, etc.), 'deepseek' (api.deepseek.com), 'google' (Google Genai SDK), or 'anthropic' (Anthropic SDK)",
     )
     parser.add_argument(
         "--model",

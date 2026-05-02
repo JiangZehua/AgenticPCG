@@ -146,11 +146,11 @@ See [docs/configuration.md](docs/configuration.md) for edit tools, initializatio
 If you find this work helpful, please cite us. Note: a formal publication is forthcoming --- this BibTeX entry will be updated accordingly.
 
 ```bibtex
-@misc{jiang2026agentic,
-  title        = {Agentic PCG: Procedural Content Generation via Tool-using LLMs},
-  author       = {Jiang, Zehua and Earle, Sam and Khalifa, Ahmed and Togelius, Julian},
-  year         = {2026},
-  howpublished = {Available at SSRN 6499021},
-  url          = {https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6499021}
+@article{jiang2026agentic,
+  title   = {Agentic PCG: Procedural Content Generation via Tool-using LLMs},
+  author  = {Jiang, Zehua and Earle, Sam and Khalifa, Ahmed and Togelius, Julian},
+  journal = {Available at SSRN 6499021},
+  year    = {2026},
+  note    = {Available at SSRN: \url{https://ssrn.com/abstract=6499021}}
 }
 ```
